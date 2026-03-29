@@ -5,7 +5,7 @@
 
 import { getDb } from '@/lib/db/client'
 
-const BASE_URL = process.env.SPORTRADAR_BASE_URL ?? 'https://api.sportradar.com/soccer/production/v4/en'
+const BASE_URL = process.env.SPORTRADAR_BASE_URL ?? 'https://api.sportradar.com/soccer/trial/v4/en'
 const API_KEY  = process.env.SPORTRADAR_API_KEY ?? ''
 
 // Default TTLs (seconds) per feed type
