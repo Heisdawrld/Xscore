@@ -1,92 +1,87 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { MatchCard }    from '@/components/ui/MatchCard'
 import { SkeletonCard } from '@/components/ui/SkeletonCard'
-import { RefreshCw, Zap, Trophy } from 'lucide-react'
+import { RefreshCw }    from 'lucide-react'
 
-type MatchData = {
-  matchId: string
-  homeTeam: { id: string; name: string; abbreviation: string }
-  awayTeam: { id: string; name: string; abbreviation: string }
-  homeScore?: number; awayScore?: number
-  status: string; minute?: number
-  scheduled: string; competition: string
+type Match = {
+  matchId:string; homeTeam:{id:string;name:string;abbreviation:string}; awayTeam:{id:string;name:string;abbreviation:string}
+  homeScore?:number; awayScore?:number; status:string; minute?:number; scheduled:string; competition:string
 }
 
-export default function HomePage() {
-  const [live, setLive]       = useState<MatchData[]>([])
-  const [today, setToday]     = useState<MatchData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+const SECTION = (color: string): React.CSSProperties => ({
+  display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14,
+})
 
-  const fetchData = useCallback(async () => {
+export default function HomePage() {
+  const [live, setLive]       = useState<Match[]>([])
+  const [today, setToday]     = useState<Match[]>([])
+  const [loading, setLoading] = useState(true)
+  const [updated, setUpdated] = useState<Date|null>(null)
+
+  const fetchAll = useCallback(async () => {
     try {
-      const [liveRes, dailyRes] = await Promise.all([
-        fetch('/api/matches/live').then(r => r.json()),
-        fetch('/api/matches/daily').then(r => r.json()),
+      const [lr, dr] = await Promise.all([
+        fetch('/api/matches/live').then(r=>r.json()),
+        fetch('/api/matches/daily').then(r=>r.json()),
       ])
-      setLive(liveRes.matches  ?? [])
-      setToday(dailyRes.matches ?? [])
-      setLastUpdate(new Date())
-    } finally {
-      setLoading(false)
-    }
+      setLive(lr.matches ?? [])
+      setToday(dr.matches ?? [])
+      setUpdated(new Date())
+    } finally { setLoading(false) }
   }, [])
 
-  useEffect(() => {
-    fetchData()
-    const iv = setInterval(fetchData, 30_000)  // refresh live every 30s
-    return () => clearInterval(iv)
-  }, [fetchData])
+  useEffect(() => { fetchAll(); const id = setInterval(fetchAll, 30000); return () => clearInterval(id) }, [fetchAll])
 
   const scheduled = today.filter(m => m.status === 'not_started')
-  const finished  = today.filter(m => ['closed','ended'].includes(m.status))
+  const finished  = today.filter(m => ['closed','ended','complete'].includes(m.status))
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
+    <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 36 }}>
+      {/* Page title */}
+      <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
         <div>
-          <h1 className="font-display text-3xl font-bold text-text-primary">Match Centre</h1>
-          <p className="text-text-secondary mt-1 text-sm">
-            {lastUpdate ? `Updated ${lastUpdate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Loading...'}
+          <h1 style={{ fontFamily:'var(--font-syne,Syne,sans-serif)', fontSize:30, fontWeight:800, color:'#e8f4fd', lineHeight:1.1 }}>
+            Match Centre
+          </h1>
+          <p style={{ fontSize:13, color:'#4a6fa5', marginTop:4 }}>
+            {updated ? `Updated ${updated.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}` : 'Loading data…'}
           </p>
         </div>
         <button
-          onClick={() => { setLoading(true); fetchData() }}
-          className="p-2.5 rounded-xl bg-surface-2 border border-border text-text-secondary hover:text-primary hover:border-primary/30 transition-all"
+          onClick={() => { setLoading(true); fetchAll() }}
+          style={{ padding:10, borderRadius:12, background:'#112240', border:'1px solid #1e3a5f', color:'#8bafc7', cursor:'pointer', display:'flex', alignItems:'center' }}
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={15} />
         </button>
       </div>
 
-      {/* Live Section */}
+      {/* LIVE */}
       {(loading || live.length > 0) && (
         <section>
-          <SectionHeader icon={<Zap size={16} className="text-live" />} title="Live Now" count={live.length} color="live" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} rows={2} />)
-              : live.map((m, i) => (
-                <MatchCard key={m.matchId} {...m} index={i} />
-              ))
-            }
+          <div style={SECTION('#ff4545')}>
+            <motion.div animate={{opacity:[1,0.4,1]}} transition={{repeat:Infinity,duration:1.5}}
+              style={{width:8,height:8,borderRadius:'50%',background:'#ff4545'}} />
+            <span style={{fontFamily:'var(--font-syne,Syne,sans-serif)',fontSize:18,fontWeight:700,color:'#e8f4fd'}}>Live Now</span>
+            {!loading && <span style={{fontSize:13,color:'#ff4545',fontWeight:600}}>({live.length})</span>}
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
+            {loading ? Array.from({length:3}).map((_,i)=><SkeletonCard key={i} rows={2}/>) : live.map((m,i)=><MatchCard key={m.matchId} {...m} index={i}/>)}
           </div>
         </section>
       )}
 
-      {/* Today Scheduled */}
+      {/* Today scheduled */}
       {(loading || scheduled.length > 0) && (
         <section>
-          <SectionHeader icon={<Trophy size={16} className="text-gold" />} title="Today" count={scheduled.length} color="gold" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} rows={2} />)
-              : scheduled.map((m, i) => (
-                <MatchCard key={m.matchId} {...m} index={i} />
-              ))
-            }
+          <div style={SECTION('#ffd700')}>
+            <div style={{width:8,height:8,borderRadius:'50%',background:'#ffd700'}} />
+            <span style={{fontFamily:'var(--font-syne,Syne,sans-serif)',fontSize:18,fontWeight:700,color:'#e8f4fd'}}>Today</span>
+            {!loading && <span style={{fontSize:13,color:'#ffd700',fontWeight:600}}>({scheduled.length})</span>}
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
+            {loading ? Array.from({length:6}).map((_,i)=><SkeletonCard key={i} rows={2}/>) : scheduled.map((m,i)=><MatchCard key={m.matchId} {...m} index={i}/>)}
           </div>
         </section>
       )}
@@ -94,32 +89,22 @@ export default function HomePage() {
       {/* Finished */}
       {finished.length > 0 && (
         <section>
-          <SectionHeader title="Results" count={finished.length} color="muted" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-            {finished.map((m, i) => (
-              <MatchCard key={m.matchId} {...m} index={i} />
-            ))}
+          <div style={SECTION('#4a6fa5')}>
+            <div style={{width:8,height:8,borderRadius:'50%',background:'#4a6fa5'}} />
+            <span style={{fontFamily:'var(--font-syne,Syne,sans-serif)',fontSize:18,fontWeight:700,color:'#e8f4fd'}}>Results</span>
+            <span style={{fontSize:13,color:'#4a6fa5',fontWeight:600}}>({finished.length})</span>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
+            {finished.map((m,i)=><MatchCard key={m.matchId} {...m} index={i}/>)}
           </div>
         </section>
       )}
 
-      {!loading && live.length === 0 && scheduled.length === 0 && finished.length === 0 && (
-        <div className="glass rounded-2xl p-16 text-center">
-          <p className="text-text-muted text-lg">No matches found for today.</p>
-          <p className="text-text-muted text-sm mt-2">Check back later or browse a specific date.</p>
+      {!loading && live.length===0 && scheduled.length===0 && finished.length===0 && (
+        <div style={{textAlign:'center',padding:'80px 24px',background:'rgba(255,255,255,0.02)',borderRadius:20,border:'1px solid rgba(255,255,255,0.06)'}}>
+          <p style={{fontSize:16,color:'#4a6fa5'}}>No matches today.</p>
         </div>
       )}
-    </div>
-  )
-}
-
-function SectionHeader({ icon, title, count, color }: { icon?: React.ReactNode; title: string; count: number; color: string }) {
-  const colors: Record<string, string> = { live: 'text-live', gold: 'text-gold', muted: 'text-text-muted' }
-  return (
-    <div className="flex items-center gap-2">
-      {icon}
-      <h2 className="font-display text-lg font-bold text-text-primary">{title}</h2>
-      <span className={`text-sm font-medium ${colors[color] ?? 'text-text-secondary'}`}>({count})</span>
     </div>
   )
 }

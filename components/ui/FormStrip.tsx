@@ -1,17 +1,10 @@
-interface Props { results: string[]; size?: 'sm' | 'md' }
-
-const COLOR: Record<string, string> = {
-  W: 'bg-win',
-  D: 'bg-draw',
-  L: 'bg-loss',
-}
-
-export function FormStrip({ results, size = 'sm' }: Props) {
-  const dotSize = size === 'sm' ? 'w-1.5 h-1.5' : 'w-2.5 h-2.5'
+const C: Record<string,string> = { W:'#00ff87', D:'#ffd700', L:'#ff4545' }
+export function FormStrip({ results, size='sm' }: { results:string[]; size?:'sm'|'md' }) {
+  const s = size==='sm' ? 6 : 10
   return (
-    <div className="flex gap-0.5 items-center">
-      {results.slice(0, 5).map((r, i) => (
-        <span key={i} className={`${dotSize} rounded-full ${COLOR[r] ?? 'bg-surface-3'}`} title={r} />
+    <div style={{ display:'flex', gap:3, alignItems:'center' }}>
+      {results.slice(0,5).map((r,i) => (
+        <span key={i} title={r} style={{ width:s, height:s, borderRadius:'50%', background:C[r]||'#1a2f4a', display:'block', flexShrink:0 }} />
       ))}
     </div>
   )

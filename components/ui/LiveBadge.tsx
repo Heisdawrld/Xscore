@@ -3,18 +3,18 @@ import { motion } from 'framer-motion'
 
 export function LiveBadge({ minute }: { minute?: number }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-live/15 border border-live/30">
-      <motion.span
-        className="relative flex h-2 w-2"
-        animate={{ scale: [1, 1.4, 1] }}
-        transition={{ repeat: Infinity, duration: 1.4 }}
-      >
-        <span className="absolute inline-flex h-full w-full rounded-full bg-live opacity-60 animate-ping" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-live" />
-      </motion.span>
-      <span className="text-[10px] font-bold tracking-widest text-live">
+    <div style={{ display:'flex', alignItems:'center', gap:6, padding:'3px 8px', borderRadius:999, background:'rgba(255,69,69,0.12)', border:'1px solid rgba(255,69,69,0.3)' }}>
+      <div style={{ position:'relative', width:7, height:7 }}>
+        <motion.div
+          animate={{ scale:[1,2,1], opacity:[1,0,1] }}
+          transition={{ repeat:Infinity, duration:1.4, ease:'easeInOut' }}
+          style={{ position:'absolute', inset:0, borderRadius:'50%', background:'#ff4545', opacity:0.5 }}
+        />
+        <div style={{ position:'absolute', inset:0, borderRadius:'50%', background:'#ff4545' }} />
+      </div>
+      <span style={{ fontSize:10, fontWeight:700, color:'#ff4545', letterSpacing:'0.08em' }}>
         {minute ? `${minute}'` : 'LIVE'}
       </span>
-    </span>
+    </div>
   )
 }

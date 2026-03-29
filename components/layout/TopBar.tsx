@@ -1,37 +1,74 @@
 'use client'
 import { useState } from 'react'
-import { Search, Bell, Wifi } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { Search, Bell } from 'lucide-react'
 
 export function TopBar() {
-  const [query, setQuery] = useState('')
+  const [q, setQ] = useState('')
 
   return (
-    <header className="flex items-center gap-4 px-4 md:px-6 py-3 border-b border-border bg-surface/80 backdrop-blur-sm flex-shrink-0">
+    <header style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16,
+      padding: '0 24px',
+      height: 56,
+      borderBottom: '1px solid #1e3a5f',
+      background: 'rgba(13,27,42,0.85)',
+      backdropFilter: 'blur(12px)',
+      flexShrink: 0,
+    }}>
       {/* Search */}
-      <div className="flex-1 max-w-md relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+      <div style={{ position: 'relative', flex: 1, maxWidth: 380 }}>
+        <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#4a6fa5' }} />
         <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Search teams, competitions, players…"
-          className="w-full bg-surface-2 border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary/50 transition-colors"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          placeholder="Search teams, leagues, players…"
+          style={{
+            width: '100%',
+            background: '#112240',
+            border: '1px solid #1e3a5f',
+            borderRadius: 12,
+            padding: '8px 14px 8px 34px',
+            fontSize: 13,
+            color: '#e8f4fd',
+            outline: 'none',
+          }}
         />
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
-        {/* Live indicator */}
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* LIVE badge */}
         <motion.div
-          animate={{ opacity: [1, 0.4, 1] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-live/10 border border-live/20"
+          animate={{ opacity: [1, 0.45, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '4px 10px',
+            borderRadius: 999,
+            background: 'rgba(255,69,69,0.12)',
+            border: '1px solid rgba(255,69,69,0.25)',
+          }}
         >
-          <Wifi size={11} className="text-live" />
-          <span className="text-xs font-medium text-live">LIVE</span>
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#ff4545', display: 'block' }} />
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#ff4545', letterSpacing: '0.1em' }}>LIVE</span>
         </motion.div>
 
-        <button className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors relative">
-          <Bell size={18} />
+        {/* Bell */}
+        <button style={{
+          padding: 8,
+          borderRadius: 10,
+          background: 'transparent',
+          border: '1px solid #1e3a5f',
+          color: '#8bafc7',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <Bell size={16} />
         </button>
       </div>
     </header>

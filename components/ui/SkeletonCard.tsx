@@ -1,20 +1,26 @@
-export function SkeletonCard({ rows = 1 }: { rows?: number }) {
+export function SkeletonCard({ rows=1 }: { rows?:number }) {
+  const pulse: React.CSSProperties = {
+    background: 'linear-gradient(90deg, #112240 25%, #1a2f4a 50%, #112240 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'shimmer 1.5s linear infinite',
+    borderRadius: 8,
+  }
   return (
-    <div className="glass rounded-2xl p-4 space-y-3">
-      <div className="flex justify-between">
-        <div className="skeleton h-3 w-28 rounded-full" />
-        <div className="skeleton h-3 w-12 rounded-full" />
+    <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:16, display:'flex', flexDirection:'column', gap:10 }}>
+      <div style={{ display:'flex', justifyContent:'space-between' }}>
+        <div style={{ ...pulse, height:10, width:100 }} />
+        <div style={{ ...pulse, height:10, width:40 }} />
       </div>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="skeleton w-7 h-7 rounded-full" />
-            <div className="skeleton h-3 w-32 rounded-full" />
+      {Array.from({length:rows}).map((_,i) => (
+        <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            <div style={{ ...pulse, width:28, height:28, borderRadius:'50%' }} />
+            <div style={{ ...pulse, height:10, width:120 }} />
           </div>
-          <div className="skeleton h-5 w-5 rounded" />
+          <div style={{ ...pulse, width:20, height:20 }} />
         </div>
       ))}
-      <div className="skeleton h-1.5 rounded-full" />
+      <div style={{ ...pulse, height:6, borderRadius:999 }} />
     </div>
   )
 }

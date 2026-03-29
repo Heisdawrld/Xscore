@@ -1,41 +1,21 @@
 'use client'
 import { motion } from 'framer-motion'
 
-interface Props {
-  label:     string
-  homeVal:   number
-  awayVal:   number
-  homeLabel?: string
-  awayLabel?: string
-  format?:   (v: number) => string
-}
+interface Props { label:string; homeVal:number; awayVal:number; format?:(v:number)=>string }
 
-export function StatBar({ label, homeVal, awayVal, homeLabel, awayLabel, format }: Props) {
+export function StatBar({ label, homeVal, awayVal, format }: Props) {
   const total = homeVal + awayVal || 1
-  const homePct = (homeVal / total) * 100
-  const awayPct = (awayVal / total) * 100
-  const fmt = format ?? ((v: number) => String(v))
-
+  const fmt = format ?? ((v:number) => String(v))
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="font-semibold text-primary">{fmt(homeVal)}</span>
-        <span className="text-text-muted text-[10px] uppercase tracking-wider">{label}</span>
-        <span className="font-semibold text-info">{fmt(awayVal)}</span>
+    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', fontSize:12 }}>
+        <span style={{ fontWeight:700, color:'#00ff87' }}>{fmt(homeVal)}</span>
+        <span style={{ color:'#4a6fa5', fontSize:10, textTransform:'uppercase', letterSpacing:'0.08em' }}>{label}</span>
+        <span style={{ fontWeight:700, color:'#00b4d8' }}>{fmt(awayVal)}</span>
       </div>
-      <div className="flex h-1.5 rounded-full overflow-hidden bg-surface-3">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${homePct}%` }}
-          transition={{ duration: 0.7, ease: [0.22,1,0.36,1] }}
-          className="bg-primary rounded-l-full"
-        />
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${awayPct}%` }}
-          transition={{ duration: 0.7, delay: 0.05, ease: [0.22,1,0.36,1] }}
-          className="bg-info rounded-r-full"
-        />
+      <div style={{ height:6, borderRadius:999, overflow:'hidden', background:'#1a2f4a', display:'flex' }}>
+        <motion.div initial={{width:0}} animate={{width:`${homeVal/total*100}%`}} transition={{duration:0.7,ease:[0.22,1,0.36,1]}} style={{background:'#00ff87', borderRadius:'999px 0 0 999px'}} />
+        <motion.div initial={{width:0}} animate={{width:`${awayVal/total*100}%`}} transition={{duration:0.7,delay:0.05,ease:[0.22,1,0.36,1]}} style={{background:'#00b4d8', borderRadius:'0 999px 999px 0'}} />
       </div>
     </div>
   )
