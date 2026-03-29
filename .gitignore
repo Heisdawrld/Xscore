@@ -3,3 +3,5 @@
 .next/
 node_modules/
 .turso/
+test-db.mjs
+tsconfig.tsbuildinfo
