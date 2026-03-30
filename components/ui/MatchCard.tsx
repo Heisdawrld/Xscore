@@ -1,4 +1,5 @@
 'use client'
+import { formatDateTime, formatTime } from '@/lib/utils/date'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { LiveBadge }      from './LiveBadge'
@@ -32,7 +33,7 @@ export function MatchCard({
   const timeLabel = isLive
     ? (minute ? `${minute}'` : 'LIVE')
     : isEnded ? 'FT'
-    : new Date(scheduled).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    : formatTime(scheduled) || 'TBD'
 
   const card: React.CSSProperties = {
     background: 'rgba(255,255,255,0.03)',

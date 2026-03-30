@@ -1,4 +1,5 @@
 'use client'
+import { formatDateTime, formatTime } from '@/lib/utils/date'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,12 +11,7 @@ import { SkeletonCard }   from '@/components/ui/SkeletonCard'
 const TABS = ['Overview','Stats','Lineups','Predictions'] as const
 type Tab = typeof TABS[number]
 
-function safeDate(s: unknown): string {
-  if (!s) return ''
-  const d = new Date(String(s))
-  if (isNaN(d.getTime())) return ''
-  return d.toLocaleString('en-GB', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
-}
+
 
 export default function MatchDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -56,7 +52,7 @@ export default function MatchDetailPage() {
 
   const ctx         = event?.sport_event_context as Record<string,unknown> | undefined
   const compName    = String((ctx?.competition as Record<string,unknown>)?.name ?? '')
-  const scheduledAt = safeDate(event?.scheduled)
+  const scheduledAt = formatDateTime(event?.scheduled)
 
   const statsTotals   = (stats as Record<string,unknown>)?.totals as Record<string,unknown> | undefined
   const homeStats     = (statsTotals?.competitors as Array<Record<string,unknown>>)?.find(c => c.qualifier==='home')?.statistics as Record<string,number> | undefined

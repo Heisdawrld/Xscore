@@ -62,7 +62,7 @@ export default function MatchesPage() {
           <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 16px', borderRadius:12, background:'#112240', border:'1px solid #1e3a5f' }}>
             <Calendar size={14} style={{color:'#4a6fa5'}}/>
             <span style={{ fontSize:13, fontWeight:600, color:'#e8f4fd' }}>
-              {isToday ? 'Today' : date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}
+              {isToday ? 'Today' : date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'})}
             </span>
           </div>
           <button onClick={() => setDate(d => addDays(d,1))}  style={btnStyle}><ChevronRight size={16}/></button>
