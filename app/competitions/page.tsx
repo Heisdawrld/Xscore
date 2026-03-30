@@ -43,7 +43,7 @@ export default function CompetitionsPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="skeleton h-16 rounded-2xl" />
           ))}
@@ -56,7 +56,7 @@ export default function CompetitionsPage() {
                 <Globe size={14} className="text-text-muted" />
                 <h2 className="text-sm font-semibold text-text-secondary">{region}</h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                 {list.map((c, i) => (
                   <motion.div key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}>
                     <Link href={`/competition/${c.id.replace('sr:competition:', '')}`}>

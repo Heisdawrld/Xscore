@@ -59,7 +59,8 @@ export async function sportradarFetch<T = unknown>(
   }
 
   // 2. Fetch from Sportradar
-  const url = `${BASE_URL}${path}${path.includes('?') ? '&' : '?'}api_key=${API_KEY}`
+  const encodedPath = path.replace(/sr:[a-z_]+:[0-9]+/g, (m) => encodeURIComponent(m))
+  const url = `${BASE_URL}${encodedPath}${encodedPath.includes('?') ? '&' : '?'}api_key=${API_KEY}`
 
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
