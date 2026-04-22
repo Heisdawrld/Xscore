@@ -1,5 +1,6 @@
 import { getSeasonStandings } from '@/lib/sportradar/endpoints'
 import type { LayerOutput } from '../types'
+import { normalizeTriplet } from '../utils/normalize'
 
 const LEAGUE_AVG_HOME_WIN_RATE = 0.46
 const LEAGUE_AVG_AWAY_WIN_RATE = 0.28
@@ -30,16 +31,17 @@ export async function homeAdvantageLayer(
 
     // Convert boost to probability adjustment
     const rawHomeBoost = (contextualBoost - 1) * 0.08  // scale to ±8%
-    const homePct  = Math.min(0.80, Math.max(0.20, 0.46 + rawHomeBoost))
-    const awayPct  = Math.min(0.60, Math.max(0.10, 0.28 - rawHomeBoost * 0.5))
-    const drawPct  = Math.max(0.10, 1 - homePct - awayPct)
+    const homePctRaw = Math.min(0.80, Math.max(0.20, 0.46 + rawHomeBoost))
+    const awayPctRaw = Math.min(0.60, Math.max(0.10, 0.28 - rawHomeBoost * 0.5))
+    const drawPctRaw = Math.max(0.10, 1 - homePctRaw - awayPctRaw)
+    const normalized = normalizeTriplet({ home: homePctRaw, draw: drawPctRaw, away: awayPctRaw })
 
     const direction = rawHomeBoost > 0.02 ? 'home' : rawHomeBoost < -0.02 ? 'away' : 'neutral' as const
 
     return {
-      home_win_prob: homePct,
-      draw_prob:     drawPct,
-      away_win_prob: awayPct,
+      home_win_prob: normalized.home,
+      draw_prob:     normalized.draw,
+      away_win_prob: normalized.away,
       confidence:    Math.min(1, homeEntry.played / 10),
       signals: [{
         layer: 'Home Advantage',

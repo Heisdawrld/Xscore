@@ -24,6 +24,21 @@ export function blendProbabilities(
   return { home: home/totalWeight, draw: draw/totalWeight, away: away/totalWeight }
 }
 
+export function normalizeTriplet(
+  probs: { home: number; draw: number; away: number },
+): { home: number; draw: number; away: number } {
+  const home = clamp(probs.home)
+  const draw = clamp(probs.draw)
+  const away = clamp(probs.away)
+  const total = home + draw + away
+  if (total <= 0) return { home: 1 / 3, draw: 1 / 3, away: 1 / 3 }
+  return {
+    home: home / total,
+    draw: draw / total,
+    away: away / total,
+  }
+}
+
 // Shannon entropy (normalized 0-1)
 export function normalizedEntropy(probs: number[]): number {
   const n = probs.length
