@@ -10,6 +10,7 @@ import { goalsMarketLayer }          from './layers/08-goals-market'
 import { varianceUpsetLayer }        from './layers/09-variance-upset'
 import { blendProbabilities }        from './utils/normalize'
 import { clamp }                     from './utils/normalize'
+import { normalizeTriplet }          from './utils/normalize'
 import { getDb }                     from '@/lib/db/client'
 import type { PredictionResult, MatchContext, LayerOutput, GoalsOutput } from './types'
 
@@ -75,6 +76,14 @@ export async function generatePrediction(ctx: MatchContext): Promise<PredictionR
       home_win_prob: clamp(modifiedAdLayer.home_win_prob - homePenaltyShift + awayPenaltyShift * 0.5),
       away_win_prob: clamp(modifiedAdLayer.away_win_prob - awayPenaltyShift + homePenaltyShift * 0.5),
     }
+    const renormalized = normalizeTriplet({
+      home: modifiedAdLayer.home_win_prob,
+      draw: modifiedAdLayer.draw_prob,
+      away: modifiedAdLayer.away_win_prob,
+    })
+    modifiedAdLayer.home_win_prob = renormalized.home
+    modifiedAdLayer.draw_prob = renormalized.draw
+    modifiedAdLayer.away_win_prob = renormalized.away
     // Reduce xG for injured-team
     if (goalsData) {
       goalsData = {

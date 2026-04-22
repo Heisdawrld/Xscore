@@ -1,6 +1,7 @@
 import { getSeasonalCompetitorStats } from '@/lib/sportradar/endpoints'
 import { scoreMatrix, matrixTo1X2, normalise } from '../utils/poisson'
 import { poissonCDF } from '../utils/poisson'
+import { clamp } from '../utils/normalize'
 import type { LayerOutput, GoalsOutput } from '../types'
 
 const LEAGUE_AVG_GOALS = 1.35  // typical league avg goals per team per game
@@ -12,8 +13,7 @@ interface TeamStats {
   matchesPlayed: number
 }
 
-function extractStats(stats: Record<string, number>, qualifier: 'home' | 'away'): TeamStats {
-  // Try to use home/away split if available, else use total
+function extractStats(stats: Record<string, number>): TeamStats {
   const played = stats['matches_played'] ?? 1
   return {
     goalsScored:   stats['goals_scored']    ?? 0,
@@ -42,8 +42,8 @@ export async function attackDefenseLayer(
     const awayTotals = awayComp.find(c => c.qualifier === 'away') ?? awayComp[0]
     if (!homeTotals || !awayTotals) return null
 
-    const homeStats = extractStats(homeTotals.statistics as Record<string, number>, 'home')
-    const awayStats = extractStats(awayTotals.statistics as Record<string, number>, 'away')
+    const homeStats = extractStats(homeTotals.statistics as Record<string, number>)
+    const awayStats = extractStats(awayTotals.statistics as Record<string, number>)
 
     // Per-game rates
     const homeGoalsPerGame = homeStats.goalsScored   / homeStats.matchesPlayed
@@ -81,9 +81,19 @@ export async function attackDefenseLayer(
         away_win_prob: probs.away,
         confidence: Math.min(1, homeStats.matchesPlayed / 10),
         signals: [
-          { layer: 'Attack/Defense Ratings', signal: `xG: Home ${xGHome.toFixed(2)} vs Away ${xGAway.toFixed(2)}`, direction: dominant, strength: Math.abs(xGHome - xGAway) / 2 },
-          { layer: 'Attack/Defense Ratings', signal: `Home attack ${homeAttack.toFixed(2)}x league avg, defense ${(1/homeDefense).toFixed(2)}x`, direction: probs.home > 0.45 ? 'home' : 'neutral', strength: homeAttack - 1 },
-          { layer: 'Attack/Defense Ratings', signal: `Away attack ${awayAttack.toFixed(2)}x league avg, defense ${(1/awayDefense).toFixed(2)}x`, direction: probs.away > 0.35 ? 'away' : 'neutral', strength: awayAttack - 1 },
+          { layer: 'Attack/Defense Ratings', signal: `xG: Home ${xGHome.toFixed(2)} vs Away ${xGAway.toFixed(2)}`, direction: dominant, strength: clamp(Math.abs(xGHome - xGAway) / 2) },
+          {
+            layer: 'Attack/Defense Ratings',
+            signal: `Home attack ${homeAttack.toFixed(2)}x league avg, defense ${homeDefense > 0 ? (1 / homeDefense).toFixed(2) : 'N/A'}x`,
+            direction: probs.home > 0.45 ? 'home' : 'neutral',
+            strength: clamp(Math.abs(homeAttack - 1)),
+          },
+          {
+            layer: 'Attack/Defense Ratings',
+            signal: `Away attack ${awayAttack.toFixed(2)}x league avg, defense ${awayDefense > 0 ? (1 / awayDefense).toFixed(2) : 'N/A'}x`,
+            direction: probs.away > 0.35 ? 'away' : 'neutral',
+            strength: clamp(Math.abs(awayAttack - 1)),
+          },
         ],
       },
       goals: {
